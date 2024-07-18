@@ -350,13 +350,16 @@ WRITE_BARRIER_END JIT_CheckedWriteBarrier
 //   x17  : trashed (ip1) if FEATURE_USE_SOFTWARE_WRITE_WATCH_FOR_GC_HEAP
 //
 WRITE_BARRIER_ENTRY JIT_WriteBarrier
+    nop
     stlr  x15, [x14]
+    nop
 
 #ifdef WRITE_BARRIER_CHECK
     // Update GC Shadow Heap
 
     // Do not perform the work if g_GCShadow is 0
     ldr  x12, LOCAL_LABEL(wbs_GCShadow)
+
     cbz  x12, LOCAL_LABEL(ShadowUpdateDisabled)
 
     // need temporary register. Save before using.
@@ -393,65 +396,106 @@ WRITE_BARRIER_ENTRY JIT_WriteBarrier
 
 LOCAL_LABEL(ShadowUpdateEnd):
     ldr  x13, [sp], #16
+
 LOCAL_LABEL(ShadowUpdateDisabled):
 #endif
 
 #ifdef FEATURE_USE_SOFTWARE_WRITE_WATCH_FOR_GC_HEAP
     // Update the write watch table if necessary
+    nop
     ldr  x12, LOCAL_LABEL(wbs_sw_ww_table)
+    nop
+
     cbz  x12, LOCAL_LABEL(CheckCardTable)
+    nop
+
     add  x12, x12, x14, lsr #0xc  // SoftwareWriteWatch::AddressToTableByteIndexShift
     ldrb w17, [x12]
+    nop
+
     cbnz x17, LOCAL_LABEL(CheckCardTable)
+    nop
+
     mov  w17, #0xFF
     strb w17, [x12]
+    nop
 #endif
 
 LOCAL_LABEL(CheckCardTable):
     // Branch to Exit if the reference is not in the Gen0 heap
     //
+    nop
     ldr  x12, LOCAL_LABEL(wbs_ephemeral_low)
+    nop
+
     cbz  x12, LOCAL_LABEL(SkipEphemeralCheck)
+    nop
+
     cmp  x15,  x12
+    nop
 
     ldr  x12, LOCAL_LABEL(wbs_ephemeral_high)
-
+    nop
     // Compare against the upper bound if the previous comparison indicated
     // that the destination address is greater than or equal to the lower
     // bound. Otherwise, set the C flag (specified by the 0x2) so that the
     // branch to exit is taken.
     ccmp x15, x12, #0x2, hs
+    nop
 
     bhs  LOCAL_LABEL(Exit)
+    nop
 
 LOCAL_LABEL(SkipEphemeralCheck):
     // Check if we need to update the card table
+    nop
     ldr  x12, LOCAL_LABEL(wbs_card_table)
+    nop
+
     add  x15, x12, x14, lsr #11
     ldrb w12, [x15]
+    nop
+
     cmp  x12, 0xFF
+    nop
+
     beq  LOCAL_LABEL(Exit)
+    nop
 
 LOCAL_LABEL(UpdateCardTable):
+    nop
     mov  x12, 0xFF
     strb w12, [x15]
+    nop
 
 #ifdef FEATURE_MANUALLY_MANAGED_CARD_BUNDLES
     // Check if we need to update the card bundle table
+    nop
     ldr  x12, LOCAL_LABEL(wbs_card_bundle_table)
+    nop
+    
     add  x15, x12, x14, lsr #21
     ldrb w12, [x15]
+    nop
+
     cmp  x12, 0xFF
+    nop
+
     beq  LOCAL_LABEL(Exit)
+    nop
 
 LOCAL_LABEL(UpdateCardBundle):
+    nop
     mov  x12, 0xFF
     strb w12, [x15]
+    nop
 #endif
 
 LOCAL_LABEL(Exit):
+    nop
     add  x14, x14, 8
     ret  lr
+    nop
 WRITE_BARRIER_END JIT_WriteBarrier
 
     // Begin patchable literal pool
