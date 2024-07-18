@@ -406,14 +406,14 @@ LOCAL_LABEL(ShadowUpdateDisabled):
     ldr  x12, LOCAL_LABEL(wbs_sw_ww_table)
     nop
 
-    cbz  x12, LOCAL_LABEL(CheckCardTable)
+    cbz  x12, LOCAL_LABEL(SkipEphemeralCheck)
     nop
 
     add  x12, x12, x14, lsr #0xc  // SoftwareWriteWatch::AddressToTableByteIndexShift
     ldrb w17, [x12]
     nop
 
-    cbnz x17, LOCAL_LABEL(CheckCardTable)
+    cbnz x17, LOCAL_LABEL(SkipEphemeralCheck)
     nop
 
     mov  w17, #0xFF
