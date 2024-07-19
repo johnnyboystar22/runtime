@@ -406,14 +406,14 @@ LOCAL_LABEL(ShadowUpdateDisabled):
     ldr  x12, LOCAL_LABEL(wbs_sw_ww_table)
     nop
 
-    cbz  x12, LOCAL_LABEL(SkipEphemeralCheck)
+    cbz  x12, LOCAL_LABEL(CheckCardTable)
     nop
 
     add  x12, x12, x14, lsr #0xc  // SoftwareWriteWatch::AddressToTableByteIndexShift
     ldrb w17, [x12]
     nop
 
-    cbnz x17, LOCAL_LABEL(SkipEphemeralCheck)
+    cbnz x17, LOCAL_LABEL(CheckCardTable)
     nop
 
     mov  w17, #0xFF
@@ -433,6 +433,9 @@ LOCAL_LABEL(CheckCardTable):
 
     cmp  x15,  x12
     nop
+    
+    blo  LOCAL_LABEL(SkipEphemeralCheck) 
+    nop
 
     ldr  x12, LOCAL_LABEL(wbs_ephemeral_high)
     nop
@@ -440,7 +443,7 @@ LOCAL_LABEL(CheckCardTable):
     // that the destination address is greater than or equal to the lower
     // bound. Otherwise, set the C flag (specified by the 0x2) so that the
     // branch to exit is taken.
-    ccmp x15, x12, #0x2, hs
+    cmp x15, x12
     nop
 
     bhs  LOCAL_LABEL(Exit)
