@@ -431,19 +431,18 @@ LOCAL_LABEL(CheckCardTable):
     cbz  x12, LOCAL_LABEL(SkipEphemeralCheck)
     nop
 
-    cmp  x15,  x12
-    nop
-    
-    blo  LOCAL_LABEL(SkipEphemeralCheck) 
+    // Subtract destination address by lower bound of ephemeral region
+    sub  x13, x14, x12                        
     nop
 
-    ldr  x12, LOCAL_LABEL(wbs_ephemeral_high)
+    ldr  x17, LOCAL_LABEL(wbs_ephemeral_high)
     nop
-    // Compare against the upper bound if the previous comparison indicated
-    // that the destination address is greater than or equal to the lower
-    // bound. Otherwise, set the C flag (specified by the 0x2) so that the
-    // branch to exit is taken.
-    cmp x15, x12
+
+    // Calculate size of ephemeral region
+    sub  x12, x17, x12
+    nop
+
+    cmp  x13, x12                             
     nop
 
     bhs  LOCAL_LABEL(Exit)
