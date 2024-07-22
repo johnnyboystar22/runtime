@@ -421,18 +421,38 @@ LOCAL_LABEL(ShadowUpdateDisabled):
     nop
 #endif
 
+
+
+LOCAL_LABEL(SkipEphemeralCheck):
+    // Check if we need to update the card table
+    nop
+    ldr  x17, LOCAL_LABEL(wbs_card_table)
+    nop
+
+    add  x15, x17, x14, lsr #11
+    ldrb w12, [x15]
+    nop
+
+    cmp  x17, 0xFF
+    nop
+
+    beq  LOCAL_LABEL(Exit)
+    nop
+
+LOCAL_LABEL(UpdateCardTable):
+    nop
+    mov  x12, 0xFF
+    strb w12, [x15]
+    nop
+
 LOCAL_LABEL(CheckCardTable):
     // Branch to Exit if the reference is not in the Gen0 heap
     //
     nop
-    
-    ldr  x17, LOCAL_LABEL(wbs_card_table)
-    nop
-
     ldr  x12, LOCAL_LABEL(wbs_ephemeral_low)
     nop
 
-    cbz  x12, LOCAL_LABEL(SkipEphemeralCheck)
+    cbz  x12, LOCAL_LABEL(Exit)
     nop
 
     cmp  x15,  x12
@@ -448,26 +468,6 @@ LOCAL_LABEL(CheckCardTable):
     nop
 
     bhs  LOCAL_LABEL(Exit)
-    nop
-
-LOCAL_LABEL(SkipEphemeralCheck):
-    // Check if we need to update the card table
-    nop
-    
-    add  x15, x17, x14, lsr #11
-    ldrb w12, [x15]
-    nop
-
-    cmp  x12, 0xFF
-    nop
-
-    beq  LOCAL_LABEL(Exit)
-    nop
-
-LOCAL_LABEL(UpdateCardTable):
-    nop
-    mov  x12, 0xFF
-    strb w12, [x15]
     nop
 
 #ifdef FEATURE_MANUALLY_MANAGED_CARD_BUNDLES
