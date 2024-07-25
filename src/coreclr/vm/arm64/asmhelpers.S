@@ -425,19 +425,19 @@ LOCAL_LABEL(CheckCardTable):
     // Branch to Exit if the reference is not in the Gen0 heap
     //
     nop
-    ldr  x12, LOCAL_LABEL(wbs_ephemeral_low)
+    adrp x17, LOCAL_LABEL(wbs_ephemeral_low)  // Load the page address of wbs_ephemeral_low
+    add x17, x17, :lo12:LOCAL_LABEL(wbs_ephemeral_low)  // Add the offset within the page
+    ldp x12, x17, [x17]  // Load the values from the address in x0 into x12 and x17
     nop
 
     cmp  x15,  x12
     nop
-
-    ldr  x12, LOCAL_LABEL(wbs_ephemeral_high)
-    nop
+    
     // Compare against the upper bound if the previous comparison indicated
     // that the destination address is greater than or equal to the lower
     // bound. Otherwise, set the C flag (specified by the 0x2) so that the
     // branch to exit is taken.
-    ccmp x15, x12, #0x2, hs
+    ccmp x15, x17, #0x2, hs
     nop
 
     bhs  LOCAL_LABEL(Exit)
@@ -446,14 +446,14 @@ LOCAL_LABEL(CheckCardTable):
 LOCAL_LABEL(SkipEphemeralCheck):
     // Check if we need to update the card table
     nop
-    ldr  x12, LOCAL_LABEL(wbs_card_table)
+    ldr  x17, LOCAL_LABEL(wbs_card_table)
     nop
 
-    add  x15, x12, x14, lsr #11
+    add  x15, x17, x14, lsr #11
     ldrb w12, [x15]
     nop
 
-    cmp  x12, 0xFF
+    cmp  x17, 0xFF
     nop
 
     beq  LOCAL_LABEL(Exit)
