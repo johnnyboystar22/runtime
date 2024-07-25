@@ -256,9 +256,6 @@ static DangerousNonHostedSpinLock g_EEStartupLock;
 // ---------------------------------------------------------------------------
 HRESULT EnsureEEStarted()
 {
-    printf("Test 1, 2, 3...\n");
-
-
     CONTRACTL
     {
         NOTHROW;
